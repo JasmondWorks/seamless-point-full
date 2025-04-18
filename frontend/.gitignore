@@ -46,3 +46,5 @@ dist/
 *.local
 *.swp
 *.lock
+
+next-env.d.ts
