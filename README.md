@@ -1,1 +1,1 @@
-# seamless-point
+# Seamless Point
