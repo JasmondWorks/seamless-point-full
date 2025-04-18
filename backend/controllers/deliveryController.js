@@ -6,10 +6,26 @@ const AppError = require("../utils/appError");
 const Email = require("../utils/email");
 const { catchAsync, sendSuccessResponseData } = require("../utils/helpers");
 
+module.exports.aliasLatestDeliveries = (req, res, next) => {
+  req.query.limit = "5";
+  req.query.sort = "-createdAt";
+  req.query.fields = "firstName,lastName,email,toState,status";
+  // req.query.sort = '-ratingsAverage,price';
+  // req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
 module.exports.createDelivery = catchAsync(async (req, res) => {
   // Add logic to check available balance before creating a delivery
 
   const newDelivery = await Delivery.create({ ...req.body, user: req.user.id });
+
+  await Notifications.create({
+    user: newDelivery.user,
+    title: "Delivery pending!",
+    message: "Your package is pending confirmation",
+    referenceType: "Delivery",
+    referenceId: newDelivery._id,
+  });
 
   sendSuccessResponseData(res, "delivery", newDelivery);
 });
@@ -27,6 +43,19 @@ module.exports.getAllDelivery = catchAsync(async (req, res) => {
 
   sendSuccessResponseData(res, "delivery", deliveries, totalCount);
 });
+module.exports.getAllUserDelivery = catchAsync(async (req, res) => {
+  const apiFeatures = new APIFEATURES(Delivery, req.query)
+    .filter({ user: req.user.id })
+    .sort()
+    .paginate()
+    .limitFields();
+
+  const totalCount = await Delivery.countDocuments({ user: req.user.id });
+
+  const deliveries = await apiFeatures.query;
+
+  sendSuccessResponseData(res, "delivery", deliveries, totalCount);
+});
 
 module.exports.getDelivery = catchAsync(async (req, res) => {
   const delivery = await Delivery.findOne({
@@ -37,7 +66,9 @@ module.exports.getDelivery = catchAsync(async (req, res) => {
 
   sendSuccessResponseData(res, "delivery", delivery);
 });
-
+module.exports.cancelDelivery = catchAsync(async (req, res) => {
+  const { deliveryId } = req.params;
+});
 module.exports.updateDelivery = catchAsync(async (req, res) => {
   const { status, driver, user, ...rest } = req.body;
 

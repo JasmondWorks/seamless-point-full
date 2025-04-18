@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
+      unique: true,
       required: [true, "Please provide your phone number"],
       validate: {
         validator: function (v) {
@@ -80,7 +81,8 @@ const userSchema = new mongoose.Schema(
         },
         message: "Passwords do not match!",
       },
-      required: [true, "Please confirm your password"],
+      // required: [true, "Please confirm your password"],
+      required: this.isNew,
     },
     passwordChangedAt: Date,
     passwordResetToken: String,
@@ -130,7 +132,7 @@ userSchema.methods.correctPassword = async function (
 userSchema.methods.changePasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
-      (this.latestTokenAssignedAt.getTime() / 1000).toString(),
+      (this.passwordChangedAt.getTime() / 1000).toString(),
       10
     );
     return changedTimestamp > JWTTimestamp;

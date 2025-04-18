@@ -8,28 +8,24 @@ import CopyToClipboard from "@/app/_components/CopyToClipboard";
 import ConfirmDialog from "@/app/_components/Dialogs/ConfirmDialog2";
 import { useState } from "react";
 import SuccessDialog from "@/app/_components/Dialogs/SuccessDialog";
-import { formatDateTime } from "@/app/_lib/utils";
-
-// Define your delivery type
-export type Delivery = {
-  trackingNumber: string;
-  amount: number;
-  receiver: string;
-  destination: string;
-  date: Date;
-  status: string;
-  dispatch: string;
-};
+import {
+  formatDateTime,
+  getBadgeStyle,
+  getParcelTotalAmount,
+} from "@/app/_lib/utils";
+import { Delivery } from "@/app/_lib/types";
+import { dispatches } from "@/app/_lib/constants";
 
 // Define the columns
-export const getDeliveriesColumns = (
-  handleCancelDelivery: (trackingNumber: string) => void
-): ColumnDef<Delivery>[] => {
+export const getDeliveriesColumns = (deliveryActions: {
+  handleCancelDelivery: (trackingNumber: string) => void;
+  handleUpdateDelivery: (trackingNumber: string, status: string) => void;
+}): ColumnDef<Delivery>[] => {
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false); // State for success dialog
 
   const handleCancelAndShowSuccess = async (trackingNumber: string) => {
     try {
-      handleCancelDelivery(trackingNumber); // Call the cancel handler
+      deliveryActions.handleCancelDelivery(trackingNumber); // Call the cancel handler
       setIsSuccessDialogOpen(true); // Open success dialog
     } catch (error) {
       console.error("Error cancelling delivery:", error);
@@ -43,12 +39,12 @@ export const getDeliveriesColumns = (
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
-          indeterminate={table.getIsSomePageRowsSelected()}
+          indeterminate={!!table.getIsSomePageRowsSelected()}
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
       ),
-      cell: ({ row, table }) => {
+      cell: ({ row }) => {
         const status = row.original.status; // Access 'status' directly from the row data
 
         if (status === "ongoing")
@@ -56,7 +52,6 @@ export const getDeliveriesColumns = (
             <>
               <ConfirmDialog
                 onConfirm={() =>
-                  // handleCancelDelivery(row.original.trackingNumber)
                   handleCancelAndShowSuccess(row.original.trackingNumber)
                 }
                 title="Cancel delivery"
@@ -91,7 +86,7 @@ export const getDeliveriesColumns = (
         return (
           <Checkbox
             checked={row.getIsSelected()}
-            indeterminate={row.getIsSomeSelected?.()} // Optional, if partial selection applies
+            indeterminate={!!row.getIsSomeSelected?.()} // Optional, if partial selection applies
             onCheckedChange={(value) => row.toggleSelected(!!value)}
             aria-label={`Select row ${row.id}`} // Accessible label for the checkbox
           />
@@ -105,7 +100,7 @@ export const getDeliveriesColumns = (
       id: "amountStatus", // Custom ID for the combined column
       header: () => <div className="text-center">AMOUNT</div>,
       cell: ({ row }) => {
-        const amount = row.original.amount; // Access 'amount' directly from the row data
+        const amount = getParcelTotalAmount(row.original.parcelDetails); // Access 'amount' directly from the row data
         const status = row.original.status; // Access 'status' directly from the row data
 
         // Format the amount as currency
@@ -114,38 +109,22 @@ export const getDeliveriesColumns = (
           currency: "NGN",
         }).format(amount);
 
-        // Determine badge based on status
-        const statusBadge = (() => {
-          switch (status) {
-            case "ongoing":
-              return <Badge variant={BadgeVariant.neutralDark}>Ongoing</Badge>;
-            case "completed":
-              return <Badge variant={BadgeVariant.blue}>Completed</Badge>;
-            case "uncompleted":
-              return <Badge variant={BadgeVariant.orange}>Uncompleted</Badge>;
-            case "cancelled":
-              return <Badge variant={BadgeVariant.red}>Cancelled</Badge>;
-            case "failed":
-              return <Badge variant={BadgeVariant.red}>Failed</Badge>;
-            default:
-              return <Badge variant={BadgeVariant.red}>Unknown status</Badge>;
-          }
-        })();
-
         return (
-          <div className="flex items-center gap-10">
-            <span className="font-medium">{formattedAmount}</span>
-            {statusBadge}
+          <div className="flex items-center gap-5">
+            <span className="font-medium min-w-32">{formattedAmount}</span>
+            <Badge className="capitalize font-medium" variant={getBadgeStyle(status)}>
+              {status}
+            </Badge>
           </div>
         );
       },
     },
     // TRACKING NUM
     {
-      accessorKey: "trackingNumber",
+      accessorKey: "trackingId",
       header: "TRACKING NUMBER",
       cell: ({ row }) => {
-        const trackingNumber = row.getValue("trackingNumber");
+        const trackingNumber = row.original.trackingId;
         return (
           <div className="flex gap-2 items-center">
             <span>{trackingNumber}</span>
@@ -158,34 +137,67 @@ export const getDeliveriesColumns = (
     {
       accessorKey: "dispatch",
       header: "DISPATCH",
-      cell: ({ row }) => (
-        <Image
-          className="w-7 object-contain mx-auto"
-          src={`/assets/images/${row.getValue("dispatch")}`}
-          alt="dispatch"
-          width={100}
-          height={100}
-        />
-      ),
+      cell: ({ row }) => {
+        const dispatch = dispatches.find(
+          (dispatch) => dispatch.name.toLowerCase() === row.original.courier
+        );
+
+        if (!dispatch) return null;
+        return (
+          <Image
+            className="w-7 object-contain mx-auto"
+            src={dispatch.logo}
+            alt={dispatch.name}
+            width={100}
+            height={100}
+          />
+        );
+      },
     },
     // RECEIVER
     {
       accessorKey: "receiver",
       header: "RECEIVER",
-      cell: ({ row }) => <span>{row.getValue("receiver")}</span>,
+      cell: ({ row }) => {
+        const receiver = row.original.receiver; // Access receiver from the row data
+        // console.log(receiver);
+        if (receiver && receiver.toFirstName && receiver.toLastName) {
+          return (
+            <span>
+              {receiver.toFirstName} {receiver.toLastName}
+            </span>
+          );
+        }
+        return <span>Receiver data not available</span>; // Fallback if receiver is undefined
+      },
     },
     // DESTINATION
     {
       accessorKey: "destination",
       header: "DESTINATION",
-      cell: ({ row }) => <span>{row.getValue("destination")}</span>,
+      cell: ({ row }) => {
+        const receiver = row.original.receiver;
+        if (receiver && receiver.toState && receiver.toCountry) {
+          return (
+            <span>
+              {receiver.toState}, {receiver.toCountry}
+            </span>
+          );
+        }
+        return <span>Destination not available</span>; // Fallback if destination is undefined
+      },
     },
     // DATE
     {
       accessorKey: "date",
       header: "DATE",
       cell: ({ row }) => {
-        return <span>{formatDateTime(row.getValue("date"))}</span>;
+        const createdAt = row.original.createdAt;
+        return (
+          <span>
+            {createdAt ? formatDateTime(createdAt) : "Date not available"}
+          </span>
+        );
       },
     },
   ];

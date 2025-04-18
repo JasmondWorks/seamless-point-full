@@ -9,14 +9,14 @@ router.post(
   "/signup",
   authController.authenticate,
   authController.authorizeRootAdmin,
-  authController.signupAdmin
+  authController.adminSignUp
 );
 
 router.post("/signIn", authController.adminSignIn);
 
 router.post("/forgotPassword", authController.forgotAdminPassword);
 
-router.patch("/resetPassword/:token", authController.resetAdminPassword);
+router.patch("/resetPassword", authController.resetAdminPassword);
 
 router.get("/authenticate", authController.authenicateAdmin);
 

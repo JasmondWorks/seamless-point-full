@@ -13,7 +13,7 @@ export enum ButtonVariant {
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   children?: ReactNode;
-  text?: string;
+  text?: string | ReactNode;
   className?: string;
   icon?: ReactNode;
   isReversed?: boolean;
@@ -45,10 +45,9 @@ export default function Button({
       type={type}
       onClick={onClick}
       className={clsx(
-        "flex items-center whitespace-nowrap justify-center gap-2 px-6 py-3 font-semibold leading-4 h-11", // Common classes
+        "flex items-center whitespace-nowrap justify-center gap-2 px-6 py-3 font-semibold leading-4 h-11 text-base disabled:cursor-not-allowed", // Common classes
         {
           "py-10": isBig,
-          "opacity-40 pointer-events-none": disabled,
           "bg-white text-brandSec":
             variant === ButtonVariant.fillWhite && !isPrimary,
           "bg-white text-brandPry":

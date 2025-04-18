@@ -63,51 +63,44 @@ export const changePasswordSchema = z
       });
     }
   });
-export const updateUserSchema = z
-  .object({
-    firstName: z
-      .string({
-        required_error: "Please provide a first name",
-      })
-      .trim()
-      .min(1, "Please provide a first name"),
-    lastName: z
-      .string({
-        required_error: "Please provide a last name",
-      })
-      .trim()
-      .min(1, "Please provide a last name"),
-    phoneNumber: z
-      .string({
-        required_error: "Phone number is required",
-      })
-      .trim()
-      .min(10, { message: "Phone number must be at least 10 digits long" })
-      .regex(/^\+?\d{10,14}$/, {
-        message: "Phone number must be valid and can include a country code",
-      }),
-    password: z
-      .string({
-        required_error: "Please provide a password",
-      })
-      .trim()
-      .min(8, "Password must be at least 8 characters"),
-    confirmPassword: z
-      .string({
-        required_error: "Please confirm your password",
-      })
-      .trim()
-      .min(8, "Password must be at least 8 characters"),
-  })
-  .superRefine((data, ctx) => {
-    if (data.password !== data.confirmPassword) {
-      ctx.addIssue({
-        code: "custom", // Specify the type of issue
-        path: ["confirmPassword"], // Target confirmPassword field
-        message: "Passwords do not match!",
-      });
-    }
-  });
+export const updateUserSchema = z.object({
+  firstName: z
+    .string({
+      required_error: "Please provide a first name",
+    })
+    .trim()
+    .min(1, "Please provide a first name"),
+  lastName: z
+    .string({
+      required_error: "Please provide a last name",
+    })
+    .trim()
+    .min(1, "Please provide a last name"),
+  email: z
+    .string({
+      required_error: "Please provide a valid email",
+    })
+    .trim()
+    .email("Please provide a valid email"),
+  dob: z
+    .date({
+      required_error: "Please provide a date of birth",
+    })
+    .refine((value) => value <= new Date(), {
+      message: "Date of birth cannot be in the future",
+    }),
+  gender: z
+    .string({
+      required_error: "Please select a gender",
+    })
+    .refine(
+      (value) => ["male", "female"].includes(value.trim().toLowerCase()),
+      {
+        message: "Gender must be 'Male' or 'Female'",
+      }
+    ),
+});
+
 export const baseUserSchema = z.object({
   ...emailSchema.shape,
   password: z
@@ -169,36 +162,18 @@ export const signUpSchema = baseUserSchema
 export const signInSchema = baseUserSchema;
 
 export const deliverySourceSchema = z.object({
-  country: z
-    .string({
-      required_error: "Please provide a country",
-    })
-    .trim()
-    .min(1, "Please provide a country"),
-  state: z
-    .string({
-      required_error: "Please provide a state",
-    })
-    .trim()
-    .min(1, "Please provide a country"),
-  firstname: z
+  firstName: z
     .string({
       required_error: "Please provide a first name",
     })
     .trim()
     .min(1, "Please provide a first name"),
-  lastname: z
+  lastName: z
     .string({
       required_error: "Please provide a last name",
     })
     .trim()
     .min(1, "Please provide a last name"),
-  city: z
-    .string({
-      required_error: "Please provide a city",
-    })
-    .trim()
-    .min(1, "Please provide a city"),
   street: z
     .string({
       required_error: "Please provide a street",
@@ -211,6 +186,30 @@ export const deliverySourceSchema = z.object({
     })
     .trim()
     .min(1, "Please provide an apartment/unit"),
+  country: z
+    .string({
+      required_error: "Please provide a country",
+    })
+    .trim()
+    .min(1, "Please provide a country"),
+  state: z
+    .string({
+      required_error: "Please provide a state",
+    })
+    .trim()
+    .min(1, "Please provide a country"),
+  city: z
+    .string({
+      required_error: "Please provide a city",
+    })
+    .trim()
+    .min(1, "Please provide a city"),
+  postCode: z
+    .string({
+      required_error: "Please provide a postcode",
+    })
+    .trim()
+    .min(1, "Please provide a postcode"),
   email: z
     .string({
       required_error: "Please provide a valid email",
@@ -226,20 +225,13 @@ export const deliverySourceSchema = z.object({
     .regex(/^[+]?\d{10,14}$/, {
       message: "Phone number must be valid and can include a country code",
     }),
-  deliveryTitle: z
-    .string({
-      required_error: "Please provide a delivery title",
-    })
-    .trim()
-    .min(1, "Please provide a delivery title"),
-  summary: z
-    .string({
-      required_error: "Please provide a delivery summary",
-    })
-    .trim()
-    .min(1, "Please provide a delivery summary"),
-  // amountOfItems: z.number(),
-  // instructions: z
+  // deliveryTitle: z
+  //   .string({
+  //     required_error: "Please provide a delivery title",
+  //   })
+  //   .trim()
+  //   .min(1, "Please provide a delivery title"),
+  // summary: z
   //   .string({
   //     required_error: "Please provide a delivery summary",
   //   })
@@ -247,36 +239,18 @@ export const deliverySourceSchema = z.object({
   //   .min(1, "Please provide a delivery summary"),
 });
 export const deliveryDestinationSchema = z.object({
-  toCountry: z
-    .string({
-      required_error: "Please provide a country",
-    })
-    .trim()
-    .min(1, "Please provide a country"),
-  toState: z
-    .string({
-      required_error: "Please provide a state",
-    })
-    .trim()
-    .min(1, "Please provide a country"),
-  toFirstname: z
+  toFirstName: z
     .string({
       required_error: "Please provide a first name",
     })
     .trim()
     .min(1, "Please provide a first name"),
-  toLastname: z
+  toLastName: z
     .string({
       required_error: "Please provide a last name",
     })
     .trim()
     .min(1, "Please provide a last name"),
-  toCity: z
-    .string({
-      required_error: "Please provide a city",
-    })
-    .trim()
-    .min(1, "Please provide a city"),
   toStreet: z
     .string({
       required_error: "Please provide a street",
@@ -289,13 +263,38 @@ export const deliveryDestinationSchema = z.object({
     })
     .trim()
     .min(1, "Please provide an apt/unit"),
+  toCountry: z
+    .string({
+      required_error: "Please provide a country",
+    })
+    .trim()
+    .min(1, "Please provide a country"),
+  toState: z
+    .string({
+      required_error: "Please provide a state",
+    })
+    .trim()
+    .min(1, "Please provide a country"),
+  toCity: z
+    .string({
+      required_error: "Please provide a city",
+    })
+    .trim()
+    .min(1, "Please provide a city"),
+
+  toPostCode: z
+    .string({
+      required_error: "Please provide a postcode",
+    })
+    .trim()
+    .min(1, "Please provide a postcode"),
   toEmail: z
     .string({
       required_error: "Please provide a valid email",
     })
     .trim()
     .email("Please provide a valid email"),
-  toPhone: z
+  toPhoneNumber: z
     .string({
       required_error: "Phone number is required",
     })
@@ -307,19 +306,22 @@ export const deliveryDestinationSchema = z.object({
 });
 
 export const parcelItemSchema = z.object({
-  itemName: z
+  name: z
     .string({
       required_error: "Please provide an item name",
     })
     .trim()
-    .min(1, "Please provide an item name"),
-  itemCategory: z
+    .min(1, "Please provide an item name")
+    .refine((val) => val.split(/\s+/).filter(Boolean).length >= 3, {
+      message: "Item name must contain at least three words",
+    }),
+  category: z
     .string({
       required_error: "Please provide an item category",
     })
     .trim()
     .min(1, "Please provide an item category"),
-  itemSubCategory: z
+  subCategory: z
     .string({
       required_error: "Please provide an item subcategory",
     })
@@ -335,38 +337,76 @@ export const parcelItemSchema = z.object({
       message: "Phone number must be valid and can include a country code",
     }),
   weight: z.preprocess(
-    (val) => (val === "" ? 1 : Number(val)), // Convert empty input to 1 as a default
-    z.number().min(1, "Weight must be greater than zero")
+    (val) => {
+      if (typeof val === "string" && val.trim() === "") return undefined; // Default to 1 for empty string
+      if (!isNaN(Number(val))) return Number(val); // Convert valid number-like strings to numbers
+      return val; // Pass invalid values to Zod for validation
+    },
+    z
+      .number({ invalid_type_error: "Must be a number" }) // Custom message for invalid numbers
+      .min(0, "Weight must be at least 0")
   ),
   quantity: z.preprocess(
-    (val) => (val === "" ? 1 : Number(val)), // Convert empty input to 1 as a default
-    z.number().int().min(1, "Quantity must be at least 1")
+    (val) => {
+      if (typeof val === "string" && val.trim() === "") return undefined; // Default to 1 for empty string
+      if (!isNaN(Number(val))) return Number(val); // Convert valid number-like strings to numbers
+      return val; // Pass invalid values to Zod for validation
+    },
+    z
+      .number({ invalid_type_error: "Must be a number" }) // Custom message for invalid numbers
+      .int("Quantity must be an integer")
+      .min(1, "Quantity must be at least 1")
   ),
+
+  // quantity must be a number
   value: z.preprocess(
-    (val) => (val === "" ? 0 : Number(val)), // Convert empty input to 0 as a default
-    z.number().min(0, "Value cannot be negative")
+    (val) => {
+      if (typeof val === "string" && val.trim() === "") return undefined; // Default to 0 for empty string
+      if (!isNaN(Number(val))) return Number(val); // Convert valid number-like strings to numbers
+      return val; // Pass invalid values to Zod for validation
+    },
+    z
+      .number({ invalid_type_error: "Must be a number" }) // Custom message for invalid numbers
+      .int("Value must be an integer")
+      .min(1, "Value must be at least 1")
   ),
 });
 export const parcelDocumentSchema = z.object({
-  itemName: z
+  name: z
     .string({
       required_error: "Please provide an item name",
     })
     .trim()
-    .min(1, "Please provide an item name"),
-  itemDescription: z
+    .min(1, "Please provide an item name")
+    .refine((val) => val.split(/\s+/).filter(Boolean).length >= 3, {
+      message: "Item name must contain at least three words",
+    }),
+  description: z
     .string({
       required_error: "Please provide an item description",
     })
     .trim()
-    .min(1, "Please provide an item category"),
+    .min(1, "Please provide an item description"),
   weight: z.preprocess(
-    (val) => (val === "" ? 1 : Number(val)), // Convert empty input to 1 as a default
-    z.number().min(1, "Weight must be greater than zero")
+    (val) => {
+      if (typeof val === "string" && val.trim() === "") return undefined; // Default to 1 for empty string
+      if (!isNaN(Number(val))) return Number(val); // Convert valid number-like strings to numbers
+      return val; // Pass invalid values to Zod for validation
+    },
+    z
+      .number({ invalid_type_error: "Must be a number" }) // Custom message for invalid numbers
+      .min(0, "Weight must be at least 0")
   ),
   quantity: z.preprocess(
-    (val) => (val === "" ? 1 : Number(val)), // Convert empty input to 1 as a default
-    z.number().int().min(1, "Quantity must be at least 1")
+    (val) => {
+      if (typeof val === "string" && val.trim() === "") return undefined; // Default to 1 for empty string
+      if (!isNaN(Number(val))) return Number(val); // Convert valid number-like strings to numbers
+      return val; // Pass invalid values to Zod for validation
+    },
+    z
+      .number({ invalid_type_error: "Must be a number" }) // Custom message for invalid numbers
+      .int("Quantity must be an integer")
+      .min(1, "Quantity must be at least 1")
   ),
 });
 
@@ -383,36 +423,39 @@ const createFileSchema = (maxFileSize: number, allowedMimeTypes: string[]) =>
       );
     },
     {
-      message: `Invalid file. Allowed types: ${allowedMimeTypes.join(
-        ", "
-      )}, and size must be less than ${(maxFileSize / (1024 * 1024)).toFixed(
-        1
-      )} MB.`,
+      message: `Invalid file. Please upload a file of type: ${allowedMimeTypes
+        .map((type) => type.split("/")[1].toUpperCase())
+        .join(", ")}. Maximum file size allowed is ${(
+        maxFileSize /
+        (1024 * 1024)
+      ).toFixed(1)} MB.`,
     }
   );
+
 export const parcelInfoSchema = z.object({
-  packaging: z
+  packagingType: z
     .string({
-      required_error: "Please provide an item name",
+      required_error: "Packaging type is required.",
     })
     .trim()
-    .min(1, "Please provide an item name"),
+    .min(1, "Please enter a valid packaging type."),
   currency: z
     .string({
-      required_error: "Please provide an item name",
+      required_error: "Currency is required.",
     })
     .trim()
-    .min(1, "Please provide an item name"),
+    .min(1, "Please enter a valid currency."),
   proofOfPurchase: createFileSchema(5 * 1024 * 1024, [
     "application/pdf", // PDF
-    "image/jpeg", // JPEG
-    "image/png", // PNG
+    "application/msword", // DOC
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // DOCX
   ]),
   packageImage: createFileSchema(2 * 1024 * 1024, [
     "image/jpeg", // JPEG
     "image/png", // PNG
   ]),
 });
+
 export const creditCardSchema = z
   .object({
     cardNumber: z

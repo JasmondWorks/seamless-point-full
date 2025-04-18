@@ -5,21 +5,19 @@ import { useUserAuth } from "../_contexts/UserAuthContext";
 
 export default function SignOutButton({
   isNavShowing,
+  styles,
 }: {
   isNavShowing: boolean;
+  styles: {
+    linkStyles: string;
+    iconStyles: string;
+  };
 }) {
   const { logout } = useUserAuth();
 
   return (
-    <button
-      onClick={logout}
-      className={`w-full lg:items-center font-medium lg:px-10 py-2 flex gap-3 ${
-        !isNavShowing
-          ? "justify-center lg:justify-start"
-          : "lg:justify-start px-8"
-      } hover:bg-neutral-200`}
-    >
-      <span className="w-7 h-7 lg:w-5 lg:h-5">
+    <button onClick={logout} className={styles.linkStyles}>
+      <span className={styles.iconStyles}>
         <svg
           className="w-full h-full"
           width={16}
@@ -37,7 +35,13 @@ export default function SignOutButton({
           />
         </svg>
       </span>
-      <span className={`${isNavShowing ? "block" : "hidden lg:block"}`}>
+      <span
+        className={`whitespace-nowrap transition-all duration-300 ease-in-out lg:block ${
+          isNavShowing
+            ? "opacity-100"
+            : "opacity-0 w-0 lg:opacity-100 lg:w-auto hidden"
+        }`}
+      >
         Logout
       </span>
     </button>

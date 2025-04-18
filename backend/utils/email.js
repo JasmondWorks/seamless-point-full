@@ -18,6 +18,7 @@ class Email {
   }
 
   async send({ file, subject, body = {} }) {
+    console.log("sending");
     const html = await ejs.renderFile(
       path.join(__dirname, "../emails", `${file}.ejs`),
       {
@@ -29,6 +30,7 @@ class Email {
       }
     );
 
+    console.log(this.user.email);
     try {
       await this.transporter.sendMail({
         from: "Seamless Point test@roware.xyz",

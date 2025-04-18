@@ -1,13 +1,13 @@
+"use client";
+
 import React from "react";
-import { getUser } from "../_lib/actions";
+// import { getUser } from "../_lib/actions";
+import { getLocalStorageKey } from "@/app/_lib/utils";
 
-export default async function Username() {
-  const user = await getUser();
+export default function Username({ userType = "user" }) {
+  const storedUser = localStorage.getItem(getLocalStorageKey("user"));
 
-  return (
-    <span>
-      {user?.firstName}
-      {/* Jasmond */}
-    </span>
-  );
+  const user = storedUser ? JSON.parse(storedUser) : null;
+
+  return <span>{user?.firstName}</span>;
 }

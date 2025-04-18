@@ -1,109 +1,106 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { FormControl } from "../ui/form";
-
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import CustomSelect from "../CustomSelect";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/_components/ui/select";
 
-export default function DatePicker({ props, field }) {
-  const [startDate, setStartDate] = useState(new Date());
-  // Generate years for the select dropdown
-  const currentYear = startDate.getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => currentYear - 50 + i);
-
-  const handleYearChange = (year: number) => {
-    const newDate = new Date(startDate);
-    newDate.setFullYear(year);
-    setStartDate(newDate);
+export default function DatePicker({ props, field }: any) {
+  const parseToDateObject = (value: any) => {
+    if (!value) return null;
+    const parsedDate = new Date(value);
+    return isNaN(parsedDate.getTime()) ? null : parsedDate;
   };
 
   return (
-    <div className="flex rounded-md border border-dark-500 bg-dark-400">
-      {/* <Image
-    src="/assets/icons/calendar.svg"
-    height={24}
-    width={24}
-    alt="user"
-    className="ml-2"
-  /> */}
+    <div className="relative flex items-center rounded-lg border bg-white h-11 shadow-sm focus-within:ring-1 focus-within:ring-brandSec">
       <FormControl>
         <ReactDatePicker
           showTimeSelect={props.showTimeSelect ?? false}
-          // showMonthDropdown // Enables month dropdown
-          showYearDropdown // Enables year dropdown
-          dropdownMode="select" // Optional: uses a select dropdown instead of scrolling
-          selected={field.value}
-          onChange={(
-            date: Date | null,
-            event?:
-              | React.MouseEvent<HTMLElement>
-              | React.KeyboardEvent<HTMLElement>
-          ) => field.onChange(date)}
+          showYearDropdown
+          dropdownMode="select"
+          selected={parseToDateObject(field.value)}
+          onChange={(date: Date | null) => field.onChange(date)}
           timeInputLabel="Time:"
           dateFormat={props.dateFormat ?? "MM/dd/yyyy"}
-          wrapperClassName="date-picker"
-          placeholderText={props.placeholder} // Set the placeholder text for the calendar input
+          wrapperClassName="w-full"
+          placeholderText={props.placeholder}
+          className="bg-transparent text-inherit text-white focus:outline-none text-sm"
+          popperClassName="z-50"
+          calendarClassName="bg-gray-900 text-white border rounded-lg shadow-lg !w-fit flex"
           renderCustomHeader={({
             date,
             changeYear,
             decreaseMonth,
             increaseMonth,
-          }) => (
-            <div className="flex justify-between items-center p-2">
-              <button
-                className="text-neutral-500"
-                onClick={(e) => {
-                  e.preventDefault();
-                  decreaseMonth();
-                }}
+          }) => {
+            const currentYear = new Date().getFullYear();
+            const years = Array.from(
+              { length: 100 },
+              (_, i) => currentYear - 50 + i
+            );
+
+            return (
+              <div
+                className="flex justify-between items-center p-2 border-gray-200"
+                onMouseDown={(e) => e.preventDefault()} // Prevent immediate closing
               >
-                <ChevronLeft />
-              </button>
-              <span className="flex items-center gap-2">
-                {/* Month displayed as static text */}
-                <span className="font-semibold text-xl">
-                  {new Date(date).toLocaleString("default", {
-                    month: "long",
-                  })}
-                </span>
-                {/* Year dropdown */}
-                {/* <select
-              value={date.getFullYear()}
-              onChange={({ target: { value } }) =>
-                changeYear(Number(value))
-              }
-              className="bg-white border border-gray-300 rounded-md p-1 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brandSec transition duration-150 ease-in-out"
-            >
-              {years.map((year) => (
-                <option
-                  className="bg-white text-black p-2 hover:bg-gray-200"
-                  key={year}
-                  value={year}
+                <button
+                  className="p-1 rounded-md hover:bg-gray-200"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    decreaseMonth();
+                  }}
                 >
-                  {year}
-                </option>
-              ))}
-            </select> */}
-                <CustomSelect
-                  value={date.getFullYear()}
-                  onChange={(year: number) => changeYear(Number(year))}
-                  options={years}
-                />
-              </span>
-              <button
-                className="text-neutral-500"
-                onClick={(e) => {
-                  e.preventDefault();
-                  increaseMonth();
-                }}
-              >
-                <ChevronRight />
-              </button>
-            </div>
-          )}
+                  <ChevronLeft className="text-gray-400" />
+                </button>
+                <span className="flex items-center gap-2">
+                  <span className="font-semibold text-lg">
+                    {new Date(date).toLocaleString("default", {
+                      month: "long",
+                    })}
+                  </span>
+                  <Select
+                    onValueChange={(year) => {
+                      changeYear(Number(year));
+                    }}
+                    value={date.getFullYear().toString()} // Use value instead of defaultValue
+                  >
+                    <SelectTrigger className="w-[80px] border rounded-md">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent
+                      className="border max-h-[200px] overflow-y-auto" // Add scroll for many years
+                      onMouseDown={(e) => e.stopPropagation()} // Prevent event bubbling
+                    >
+                      {years.map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </span>
+                <button
+                  className="p-1 rounded-md hover:bg-gray-200"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    increaseMonth();
+                  }}
+                >
+                  <ChevronRight className="text-gray-400" />
+                </button>
+              </div>
+            );
+          }}
         />
       </FormControl>
     </div>

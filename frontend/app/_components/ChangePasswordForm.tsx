@@ -17,8 +17,9 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { changeUserPassword } from "@/app/_lib/actions";
 import { useUserAuth } from "../_contexts/UserAuthContext";
-import Button, { ButtonVariant } from "./Button";
 import { z } from "zod";
+import Button, { ButtonVariant } from "@/app/_components/Button";
+import Spinner from "@/app/_components/Spinner";
 
 export default function ChangePasswordForm() {
   const { login } = useUserAuth();
@@ -38,24 +39,20 @@ export default function ChangePasswordForm() {
   async function onSubmit(data: z.infer<typeof changePasswordSchema>) {
     const { currPassword, password, confirmPassword } = data;
 
-    try {
-      setIsLoading(true);
-      const res = await changeUserPassword(
-        currPassword,
-        password,
-        confirmPassword
-      );
-      const { token } = res;
-      login(undefined, token);
-      toast.success("Password successfully changed");
+    setIsLoading(true);
+    const res = await changeUserPassword(
+      currPassword,
+      password,
+      confirmPassword
+    );
 
-      // Reset the form after success
-      reset();
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setIsLoading(false);
+    if (res.status === "success") {
+      toast.success(res.message);
+      login(null, res.token);
+    } else {
+      toast.error(res.message);
     }
+    setIsLoading(false);
   }
 
   return (
@@ -82,10 +79,22 @@ export default function ChangePasswordForm() {
             fieldType={FormFieldType.PASSWORD}
           />
         </div>
-        <ButtonFormSubmit
-          isLoading={isLoading}
-          text="Save"
-          className="bg-customGreen !w-fit"
+        <Button
+          disabled={isLoading}
+          type="submit"
+          variant={ButtonVariant.fill}
+          text={
+            isLoading ? (
+              <span className="flex items-center gap-2">
+                Saving{" "}
+                <Spinner color="text" size="small" className="!w-5 !h-5" />
+              </span>
+            ) : (
+              "Save"
+            )
+          }
+          className="bg-customGreen text-white"
+          isRoundedLarge
         />
       </form>
     </Form>

@@ -11,13 +11,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
 import { Form } from "@/app/_components/ui/form";
 import { useForm } from "react-hook-form";
-import { FaChevronRight } from "react-icons/fa";
 import { z } from "zod";
-import Navbar from "@/app/_components/Navbar";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { forgotUserPassword } from "@/app/_lib/actions";
 import { useRouter } from "next/navigation";
+import CountdownTimer from "@/app/_components/CountdownTimer";
+import { CountdownToast } from "@/app/_components/CountdownToast";
 
 export default function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,20 +31,24 @@ export default function ForgotPassword() {
   });
 
   async function onSubmit({ email }: z.infer<typeof emailSchema>) {
-    try {
-      setIsLoading(true);
-      const res = await forgotUserPassword(email);
-      toast.success(`${res.message}`);
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
+    setIsLoading(true);
+    const res = await forgotUserPassword(email);
+
+    if (res.status === "success") {
+      toast.success(
+        // "A link has been sent to your email.\nClick on it to reset your password"
+        res.message
+      );
+      form.reset();
+    } else {
+      toast.error(res.message);
     }
+
+    setIsLoading(false);
   }
 
   return (
     <div className="flex flex-col h-screen bg-brandPryLight">
-      {/* <Navbar className="!bg-brandPryLight" /> */}
       <main className="h-full flex-1 grid place-items-center">
         <div>
           <h1 className="mb-5 headline text-center">Forgot Your Password?</h1>
@@ -68,7 +72,7 @@ export default function ForgotPassword() {
                   text="RESET PASSWORD"
                   className="!bg-brandPry"
                   isReversed
-                  isLoading={isLoading}
+                  disabled={isLoading}
                 />
               </div>
               <Link

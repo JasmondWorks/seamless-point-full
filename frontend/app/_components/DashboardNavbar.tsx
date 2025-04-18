@@ -14,6 +14,7 @@ import { usePathname } from "next/navigation";
 import SignOutButton from "./SignOutButton";
 import { IoClose, IoWalletOutline } from "react-icons/io5";
 import { FaRegUserCircle } from "react-icons/fa";
+import { useUserAuth } from "@/app/_contexts/UserAuthContext";
 
 const navLinks = [
   {
@@ -216,9 +217,22 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isNavShowing, setIsNavShowing] = useState(false);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
-  const { role } = JSON.parse(localStorage.getItem("user"));
 
-  // console.log(overlayRef.current);
+  const { user } = useUserAuth();
+  const { role } = user;
+
+  const getLinkStyles = (path?: string | null, paths?: string[]) => {
+    return `font-medium lg:px-10 px-3 py-4 lg:py-3  flex items-center gap-3 w-full transition-all duration-300 ease-in-out ${
+      !isNavShowing ? "g:justify-start" : "lg:justify-start px-6"
+    } hover:bg-neutral-200 ${
+      pathname === path ? "text-brandSec pointer-events-none" : ""
+    } 
+    
+    // If an array of pathname if passed in e.g /user/settings or /admin/settings
+    ${paths?.includes(pathname ? "text-brandSec pointer-events-none" : "")}`;
+  };
+  const iconStyles =
+    "w-8 lg:w-6 aspect-square flex items-center justify-center flex-shrink-0";
 
   function handleToggleNav() {
     setIsNavShowing((cur) => !cur);
@@ -227,8 +241,6 @@ export default function Navbar() {
   useEffect(() => {
     setIsNavShowing(false);
   }, [pathname]);
-  // const pageCategory = pathname.split("/")[2];
-  // console.log(pathname.split("/"), pathname);
 
   useEffect(() => {
     if (isNavShowing) {
@@ -252,11 +264,15 @@ export default function Navbar() {
 
       <div
         className={`${
-          isNavShowing ? "w-72" : "w-16"
-        } w-16 lg:min-w-72 top-0 h-full pt-24 fixed bg-[#fafafa] z-20 lg:relative  lg:pt-32 items-center md:items-start py-6 border-r border-neutral-200 lg:py-10 pb-0 flex flex-col justify-between overflow-hidden overflow-y-scroll transition-all`}
+          isNavShowing ? "w-72" : "w-14"
+        } absolute lg:relative h-full bg-[#fafafa] z-20 lg:min-w-72 items-center md:items-start py-6 border-r border-neutral-200 lg:py-10 pb-0 flex flex-col justify-between overflow-hidden overflow-y-scroll transition-all duration-300 ease-in-out`}
       >
         {/* Rectangle shapes */}
-        <div className="hidden lg:block absolute top-0 left-0 -z-10">
+        <div
+          className={`absolute ${
+            !isNavShowing ? "hidden" : "block"
+          } lg:block top-0 left-0 -z-10`}
+        >
           <svg
             width="156"
             height="169"
@@ -283,7 +299,11 @@ export default function Navbar() {
           </svg>
         </div>
         {/* Triangle shapes */}
-        <div className="hidden lg:block absolute bottom-0 right-0 -z-10">
+        <div
+          className={`absolute ${
+            !isNavShowing ? "hidden" : "block"
+          } lg:block bottom-0 right-0 -z-10`}
+        >
           <svg
             width="111"
             height="213"
@@ -292,18 +312,18 @@ export default function Navbar() {
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M13.5262 0.342651L231.678 141.445L0.403466 259.819L13.5262 0.342651Z"
+              d="M13.5262 0.344604L231.678 141.447L0.403466 259.821L13.5262 0.344604Z"
               fill="#D9D9D9"
             />
             <path
-              d="M35.5262 42.3427L253.678 183.445L22.4035 301.819L35.5262 42.3427Z"
+              d="M35.5262 42.3446L253.678 183.447L22.4035 301.821L35.5262 42.3446Z"
               fill="#EE5E21"
             />
           </svg>
         </div>
         <button
           onClick={handleToggleNav}
-          className={`text-3xl flex lg:hidden ${
+          className={`text-3xl flex lg:hidden transition-all duration-300 ease-in-out ${
             !isNavShowing
               ? "justify-center lg:justify-start mx-auto"
               : "ml-auto px-5 lg:justify-start"
@@ -315,101 +335,49 @@ export default function Navbar() {
             <IoClose className="pointer-events-none" />
           )}
         </button>
-        <div className="w-full flex flex-col gap-16 items-center lg:items-start">
+        <div className="w-full flex-1 flex flex-col gap-16 items-center justify-center">
           <nav className="w-full">
             <ul>
-              {role === "user" &&
-                navLinks.map((link) => (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <li key={link.path}>
-                          <Link
-                            href={link.path}
-                            className={`font-medium lg:items-center lg:px-10 py-2 flex gap-3 ${
-                              !isNavShowing
-                                ? "justify-center lg:justify-start"
-                                : "lg:justify-start px-8"
-                            } hover:bg-neutral-200 ${
-                              pathname === link.path
-                                ? "text-brandSec pointer-events-none"
-                                : ""
+              {(role === "user" ? navLinks : adminNavLinks).map((link) => (
+                <TooltipProvider key={link.path}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <li>
+                        <Link
+                          href={link.path}
+                          className={getLinkStyles(link.path)}
+                        >
+                          <div className={iconStyles}>{link.icon}</div>
+                          <span
+                            className={`whitespace-nowrap transition-all duration-300 ease-in-out lg:block ${
+                              isNavShowing
+                                ? "opacity-100"
+                                : "opacity-0 w-0 lg:opacity-100 lg:w-auto hidden"
                             }`}
                           >
-                            <span className="w-7 h-7 lg:w-5 lg:h-5">
-                              {link.icon}
-                            </span>
-                            <span
-                              className={`${
-                                isNavShowing ? "block" : "hidden lg:block"
-                              }`}
-                            >
-                              {link.title}
-                            </span>
-                          </Link>
-                        </li>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{link.title}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ))}
-              {role === "admin" &&
-                adminNavLinks.map((link) => (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <li key={link.path}>
-                          <Link
-                            href={link.path}
-                            className={`font-medium lg:items-center lg:px-10 py-2 flex gap-3 ${
-                              !isNavShowing
-                                ? "justify-center lg:justify-start"
-                                : "lg:justify-start px-8"
-                            } hover:bg-neutral-200 ${
-                              pathname === link.path
-                                ? "text-brandSec pointer-events-none"
-                                : ""
-                            }`}
-                          >
-                            <span className="w-7 h-7 lg:w-5 lg:h-5">
-                              {link.icon}
-                            </span>
-                            <span
-                              className={`${
-                                isNavShowing ? "block" : "hidden lg:block"
-                              }`}
-                            >
-                              {link.title}
-                            </span>
-                          </Link>
-                        </li>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{link.title}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ))}
+                            {link.title}
+                          </span>
+                        </Link>
+                      </li>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{link.title}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ))}
             </ul>
           </nav>
         </div>
         <div className="lg:mx-0 w-full flex flex-col items-center">
           <Link
             href={role === "user" ? "/user/settings" : "/admin/settings"}
-            className={`w-full lg:items-center font-medium lg:px-10 py-2 flex gap-3 ${
-              !isNavShowing
-                ? "justify-center lg:justify-start"
-                : "lg:justify-start px-8"
-            } hover:bg-neutral-200 ${
-              pathname === "/user/settings" || "/admin/settings"
-            }
-                ? "text-brandSec pointer-events-none"
-                : ""
-            }`}
+            className={getLinkStyles(null, [
+              "/user/settings",
+              "/admin/settings",
+            ])}
           >
-            <span className="w-7 h-7 lg:w-5 lg:h-5">
+            <div className={iconStyles}>
               <svg
                 className="w-full h-full"
                 width={16}
@@ -433,12 +401,21 @@ export default function Navbar() {
                   strokeLinejoin="round"
                 />
               </svg>
-            </span>
-            <span className={`${isNavShowing ? "block" : "hidden lg:block"}`}>
+            </div>
+            <span
+              className={`whitespace-nowrap transition-all duration-300 ease-in-out lg:block ${
+                isNavShowing
+                  ? "opacity-100"
+                  : "opacity-0 w-0 lg:opacity-100 lg:w-auto hidden"
+              }`}
+            >
               Settings
             </span>
           </Link>
-          <SignOutButton isNavShowing={isNavShowing} />
+          <SignOutButton
+            styles={{ linkStyles: getLinkStyles(), iconStyles }}
+            isNavShowing={isNavShowing}
+          />
         </div>
       </div>
     </>

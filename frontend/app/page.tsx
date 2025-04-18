@@ -16,13 +16,16 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen">
       <Navbar />
-      <ScrollArea className="flex-1 h-full mt-20 md:mt-0">
-        <section className="py-32 lg:py-16">
+      <ScrollArea className="flex-1 h-full">
+        <section id="home" className="py-32 lg:py-16">
           <div className="container-custom">
             <div className="grid gap-10 gap-y-5 lg:grid-cols-2 items-center">
               <div className="space-y-8">
                 <div className="relative">
-                  <h1 className="headline !text-left">
+                  <h1
+                    style={{ fontSize: "2.85rem" }}
+                    className="headline !text-left"
+                  >
                     Providing <span className="text-brandPry">seamless, </span>
                     simplified and efficient logistics processes
                   </h1>
@@ -1363,7 +1366,7 @@ export default function Home() {
           <h2 className="light section-heading">Meet Our Partners</h2>
           <LogoSlider />
         </section>
-        <section className="py-16">
+        <section id="products" className="py-16">
           <div className="container-custom">
             <div className="flex flex-col md:flex-row justify-center gap-28 items-start">
               <div className="relative ml-3 md:ml-5 max-w-md">
@@ -1399,7 +1402,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <section className="py-16">
+        <section id="about-us" className="py-16">
           <h2 className="section-heading">Our Services</h2>
           <OurServices />
         </section>
@@ -1410,7 +1413,7 @@ export default function Home() {
                 <ImageSkillsGallery />
               </div>
               <div className="lg:col-span-2 space-y-10">
-                <p className="section-subheading text-brandSec">Service Sale</p>
+                <p className="section-subheading text-brandSec">Service Hub</p>
                 <h2 className="section-heading !text-left text-brandPryDark">
                   Search for any essential skill you need and have it brought to
                   your doorstep
@@ -1420,7 +1423,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <section className="py-16 relative bg-brandSecLight">
+        <section id="faqs" className="py-16 relative bg-brandSecLight">
           <div className="container-custom relative z-10">
             <h2 className="section-heading">
               Frequently Asked <span className="text-brandSec">Questions</span>
@@ -1470,8 +1473,8 @@ export default function Home() {
           </div>
           <svg
             className="absolute right-0 bottom-[50%] translate-y-[50%]"
-            width="550"
-            height="600"
+            width={550}
+            height={600}
             viewBox="0 0 550 600"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -1480,7 +1483,7 @@ export default function Home() {
               d="M115.88 158.237C120.039 125.405 150.114 102.094 182.945 106.253L212.707 110.024C245.538 114.183 268.85 144.257 264.69 177.089L264.266 180.437C261.698 200.713 248.982 218.285 230.583 227.011L188.141 247.243C175.679 253.192 164.909 262.176 156.821 273.369C148.732 284.562 143.584 297.608 141.848 311.308L141.683 312.61C139.597 329.072 151.212 344.057 167.674 346.143C184.137 348.228 199.121 336.613 201.207 320.151L201.372 318.849C202.338 311.222 207.14 304.649 213.983 301.357L256.425 281.125C293.246 263.488 318.665 228.436 323.802 187.885L324.226 184.537C332.557 118.781 286.015 58.7367 220.26 50.4065L190.497 46.6361C124.73 38.3988 64.6858 84.9403 56.3556 150.696C54.2701 167.158 65.8851 182.143 82.3473 184.228C98.8095 186.314 113.794 174.699 115.88 158.237ZM152.581 465.284C162.448 466.534 172.407 463.813 180.268 457.72C188.128 451.627 193.247 442.661 194.497 432.794C195.747 422.928 193.026 412.968 186.933 405.108C180.84 397.247 171.874 392.129 162.007 390.879C152.14 389.629 142.181 392.35 134.32 398.443C126.46 404.536 121.341 413.502 120.091 423.368C118.841 433.235 121.562 443.194 127.655 451.055C133.748 458.916 142.714 464.034 152.581 465.284Z"
               fill="#CCCCCC"
             />
-            <g clip-path="url(#clip0_655_4161)">
+            <g clipPath="url(#clip0_655_4161)">
               <path
                 d="M386.062 205.736C400.048 175.743 435.805 162.729 465.798 176.715L492.987 189.393C522.98 203.379 535.994 239.136 522.008 269.129L520.582 272.188C511.945 290.71 494.471 303.561 474.286 306.251L427.693 312.557C414.009 314.417 401.011 319.682 389.891 327.871C378.771 336.06 369.884 346.91 364.048 359.426L363.493 360.615C356.48 375.654 362.965 393.47 378.004 400.483C393.043 407.496 410.859 401.011 417.871 385.972L418.426 384.783C421.675 377.815 428.255 373.022 435.776 371.978L482.369 365.672C522.817 360.121 557.726 334.505 575 297.46L576.426 294.401C604.438 234.33 578.455 162.942 518.384 134.93L491.194 122.251C431.084 94.3246 359.695 120.308 331.684 180.379C324.671 195.418 331.155 213.234 346.194 220.247C361.233 227.26 379.049 220.775 386.062 205.736ZM327.25 509.325C336.264 513.528 346.578 513.978 355.924 510.577C365.27 507.175 372.881 500.2 377.084 491.186C381.288 482.173 381.738 471.858 378.336 462.513C374.935 453.167 367.96 445.555 358.946 441.352C349.932 437.149 339.618 436.698 330.272 440.1C320.926 443.501 313.315 450.476 309.111 459.49C304.908 468.504 304.458 478.818 307.859 488.164C311.261 497.51 318.236 505.122 327.25 509.325Z"
                 fill="#CCCCCC"
@@ -1489,8 +1492,8 @@ export default function Home() {
             <defs>
               <clipPath id="clip0_655_4161">
                 <rect
-                  width="300"
-                  height="480"
+                  width={300}
+                  height={480}
                   fill="white"
                   transform="translate(381.482 38.0935) rotate(25)"
                 />
@@ -1498,7 +1501,7 @@ export default function Home() {
             </defs>
           </svg>
         </section>
-        <section className="p-8 lg:p-16">
+        <section id="contact-us" className="p-8 lg:p-16">
           <div className="bg-brandPry p-10 rounded-3xl">
             <div className="max-w-2xl mx-auto">
               <h2 className="section-heading text-white">

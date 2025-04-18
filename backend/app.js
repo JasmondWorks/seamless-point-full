@@ -14,6 +14,10 @@ const adminRoutes = require("./routes/adminRoutes");
 const deliveryRoutes = require("./routes/deliveryRoutes");
 const driverRoutes = require("./routes/driverRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const transactionRoutes = require("./routes/transactionRoutes");
+const shipmentRoutes = require("./routes/shipmentRoutes");
+const trackingRoutes = require("./routes/trackingRoutes");
+const webhookRoutes = require("./routes/webhookRoutes");
 
 dotenv.config({ path: "./config.env" });
 
@@ -39,7 +43,18 @@ app.use(
 
 app.use(express.static(`${__dirname}/public`));
 
+app.use((req, _, next) => {
+  req.rawBody = "";
+  req.on("data", (chunk) => {
+    req.rawBody += chunk;
+  });
+  next();
+});
+
 // Routes
+app.get("/", (_, res) => {
+  res.send("Welcome to the Seamless Point API");
+});
 app.use("/api/v1/users", userRoutes);
 
 app.use("/api/v1/admins", adminRoutes);
@@ -49,6 +64,10 @@ app.use("/api/v1/delivery", deliveryRoutes);
 app.use("/api/v1/drivers", driverRoutes);
 
 app.use("/api/v1/notifications", notificationRoutes);
+app.use("/api/v1/transactions", transactionRoutes);
+app.use("/api/v1/shipment", shipmentRoutes);
+app.use("/api/v1/tracking", trackingRoutes);
+app.use("/api/v1/webhook", webhookRoutes);
 
 app.get("/", (_req, res) => {
   res.send("<h1>Deployment Check</h1>");

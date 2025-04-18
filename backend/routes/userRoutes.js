@@ -6,15 +6,15 @@ const deliveryController = require("../controllers/deliveryController");
 
 const router = express.Router();
 
-router.post("/login", authController.loginUser);
+router.post("/login", authController.userLogin);
 
-router.post("/signup", authController.signupUser);
+router.post("/signup", authController.userSignUp);
 
 router.post("/signIn", authController.userSignIn);
 
 router.post("/forgotPassword", authController.forgotUserPassword);
 
-router.patch("/resetPassword/:token", authController.resetUserPassword);
+router.patch("/resetPassword", authController.resetUserPassword);
 
 router.get("/authenticate", authController.authenticateUser);
 
@@ -34,12 +34,12 @@ router
   )
   .patch(
     authController.authenticate,
-    authController.authorize("admin"),
+    authController.authorize("user"),
     userController.updateMe
   )
   .delete(
     authController.authenticate,
-    authController.authorize("admin"),
+    authController.authorize("user"),
     userController.deleteMe
   );
 
@@ -48,6 +48,13 @@ router.get(
   authController.authenticate,
   authController.authorize("user"),
   userController.getMyDelivery
+);
+
+router.get(
+  "/me/transactions",
+  authController.authenticate,
+  authController.authorize("user"),
+  userController.getMyTransactions
 );
 
 router.get(
@@ -87,5 +94,13 @@ router.get(
   authController.authorize("admin"),
   userController.getAllUser
 );
+router
+  .route("/latest")
+  .get(
+    authController.authenticate,
+    authController.authorize("admin"),
+    userController.alistLatestUsers,
+    userController.getAllUser
+  );
 
 module.exports = router;
